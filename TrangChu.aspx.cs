@@ -18,6 +18,8 @@ namespace BTL_PTUD
                 currentPage = 1;
                 ViewState["CurrentPage"] = currentPage;
                 LoadProductsPaged(currentPage);
+
+                LoadCategories();
             }
         }
 
@@ -25,7 +27,7 @@ namespace BTL_PTUD
         {
             int offset = (page - 1) * PageSize;
             string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
-            string query = $"SELECT * FROM product ORDER BY product_id OFFSET {offset} ROWS FETCH NEXT {PageSize} ROWS ONLY";
+            string query = $"SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY product_id) AS RowNum, * FROM product) AS Products WHERE RowNum > {offset} AND RowNum <= {offset + PageSize}";
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
@@ -87,7 +89,10 @@ namespace BTL_PTUD
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
-            // Implement search logic here
+            string searchKeyword = txtSearch.Text.Trim();
+            string query = $"SELECT * FROM product WHERE name LIKE '%{searchKeyword}%'";
+
+            LoadProducts(query);
         }
 
         protected void btnFilterPrice_Click(object sender, EventArgs e)
@@ -232,5 +237,32 @@ namespace BTL_PTUD
                 Response.Redirect("Cart.aspx");
             }
         }
+
+        private void LoadCategories()
+        {
+            string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
+            string query = "SELECT * FROM category";
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                SqlCommand cmd = new SqlCommand(query, conn);
+                conn.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                rptCategories.DataSource = reader;
+                rptCategories.DataBind();
+                conn.Close();
+            }
+        }
+        protected void rptCategories_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "SelectCategory")
+            {
+                int categoryId = Convert.ToInt32(e.CommandArgument);
+                string query = $"SELECT * FROM product WHERE category_id = {categoryId}";
+
+                LoadProducts(query);
+            }
+        }
+
     }
 }

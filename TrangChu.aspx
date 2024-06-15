@@ -85,6 +85,21 @@
         .pagination button:hover:not(:disabled) {
             background-color: #0056b3;
         }
+        .category-menu {
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        .category-menu a {
+            padding: 10px 15px;
+            background-color: darkorange;
+            color: #ffffff;
+            text-decoration: none;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .category-menu a:hover {
+            background-color: lightpink;
+        }
     </style>
 </head>
 <body>
@@ -108,6 +123,14 @@
             <asp:Button ID="btnHome" runat="server" CssClass="btn-home" Text="Trở về Trang Chủ" OnClick="btnHome_Click" />
             <asp:Button ID="btnViewCart" runat="server" CssClass="btn-cart" Text="Xem Giỏ Hàng" OnClick="btnViewCart_Click" />
             <asp:Button ID="btnViewOrder" runat="server" CssClass="btn-order" Text="Đơn hàng đã mua" OnClick="btnViewOrder_Click" />
+
+            <div class="category-menu">
+                <asp:Repeater ID="rptCategories" runat="server" OnItemCommand="rptCategories_ItemCommand">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="lnkCategory" runat="server" CommandName="SelectCategory" CommandArgument='<%# Eval("category_id") %>'><%# Eval("name") %></asp:LinkButton>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </div>
 
             <asp:DataList ID="DataListProducts" runat="server" DataKeyField="product_id" RepeatColumns="4" OnItemCommand="DataListProducts_ItemCommand" Width="100%">
                 <ItemTemplate>
