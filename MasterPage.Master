@@ -1,0 +1,36 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="MasterPage.master.cs" Inherits="BTL_PTUD.MasterPage" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title>
+        <asp:ContentPlaceHolder ID="tieude" runat="server" />
+    </title>
+    <link href="style.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <div id="container">
+                <h1>TRANG ĐĂNG NHẬP</h1>
+                <div id="login">
+                    <asp:Label ID="tendn" runat="server" Text="Label">Ten dang nhap</asp:Label>
+                    <asp:TextBox ID="txttdn" runat="server" Height="18px" Width="169px" style="margin-left: 0px"></asp:TextBox>
+                    </br>
+                    </br>
+                    <asp:Label ID="mk" runat="server" Text="Label">Mat khau</asp:Label>
+                     <asp:TextBox ID="txtmk" runat="server" Height="18px" Width="169px" style="margin-left: 0px"></asp:TextBox>
+                </div>
+                <div id="btn">
+                    <asp:LinkButton ID="btndky" runat="server">Đăng ký</asp:LinkButton>
+                    <asp:Button ID="btnok" runat="server" Text="Đăng nhập" Width="118px" />
+                </div>
+                <footer>
+                    Fit_Haui - 05/2024
+                </footer>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,72 @@
+﻿body {
+    background-color: #10889E;
+    font-family: Verdana;
+}
+
+
+label {
+    width: 100px;
+    float: left;
+}
+
+#login{
+    text-align: left;
+    margin-left: 200px
+}
+
+#tendn{
+    margin-right: 50px;
+    margin-top: 30px;
+}
+#mk{
+    margin-right: 98px
+}
+#btn{
+    margin-top:30px;
+    margin-left: 240px;
+}
+#btnok{
+    margin-left: 30px
+}
+#container {
+    width: 960px;
+    margin: auto;
+    background-color: #E1F1F2;
+}
+
+h1 {
+    background-color: darkblue;
+    text-align: center;
+    font-size: 2em;
+    color: white;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: normal;
+    margin: 0;
+    padding: 20px
+}
+
+h2 {
+    color: #445566;
+    padding: 0px
+}
+
+h3 {
+    color: #445566;
+    padding: 0px
+}
+
+
+#main {
+    width: 650px;
+    float: right;
+    margin-right: 30px;
+    line-height: 25px;
+}
+
+footer {
+    height: 50px;
+    background-color: #B6B6B4;
+    clear: both;
+    line-height: 50px;
+    text-align: center;
+}
