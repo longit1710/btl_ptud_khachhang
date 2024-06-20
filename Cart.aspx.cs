@@ -18,18 +18,18 @@ namespace BTL_PTUD
 
         private void LoadCart()
         {
-            int customerId = GetCustomerId();
+            int userID = Helper.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
                 string query = @"
             SELECT c.cart_id, c.product_id, p.name, p.image, c.quantity, c.price
-            FROM cart c
-            JOIN product p ON c.product_id = p.product_id
-            WHERE c.customer_id = @CustomerID AND c.status = 'Pending'";
+            FROM [cart] c
+            JOIN [product] p ON c.product_id = p.product_id
+            WHERE c.user_id = @userID AND c.status = 'Pending'";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@CustomerID", customerId);
+                cmd.Parameters.AddWithValue("@userID", userID);
 
                 conn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -39,11 +39,15 @@ namespace BTL_PTUD
 
                 query = @"
             SELECT SUM(price * quantity)
-            FROM cart
-            WHERE customer_id = @CustomerID AND status = 'Pending'";
-                cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@CustomerID", customerId);
-                lblTotalPrice.Text = ((decimal?)cmd.ExecuteScalar() ?? 0).ToString("#,##0.00") + " ₫";
+            FROM [cart]
+            WHERE user_id = @userID AND status = 'Pending'
+            GROUP BY user_id";
+                using (SqlCommand cmdd = new SqlCommand(query, conn))
+                {
+                    cmdd.Parameters.AddWithValue("@userID", userID);
+                    var totalPrice = cmdd.ExecuteScalar();
+                    lblTotalPrice.Text = ((decimal?)totalPrice ?? 0).ToString("#,##0.00") + " ₫";
+                }
 
 
                 conn.Close(); // Đóng SqlConnection sau khi sử dụng xong
@@ -69,7 +73,7 @@ namespace BTL_PTUD
                     if (quantity < 1)
                     {
                         // Xóa sản phẩm khỏi giỏ hàng nếu số lượng là 0
-                        string deleteQuery = "DELETE FROM cart WHERE cart_id = @CartID";
+                        string deleteQuery = "DELETE FROM [cart] WHERE cart_id = @CartID";
                         SqlCommand deleteCmd = new SqlCommand(deleteQuery, conn);
                         deleteCmd.Parameters.AddWithValue("@CartID", cartId);
 
@@ -82,7 +86,7 @@ namespace BTL_PTUD
                     }
                 }
 
-                string query = "UPDATE cart SET quantity = @Quantity WHERE cart_id = @CartID";
+                string query = "UPDATE [cart] SET quantity = @Quantity WHERE cart_id = @CartID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Quantity", quantity);
                 cmd.Parameters.AddWithValue("@CartID", cartId);
@@ -109,7 +113,7 @@ namespace BTL_PTUD
                 if (quantity < 1)
                 {
                     // Xóa sản phẩm khỏi giỏ hàng nếu số lượng là 0
-                    string deleteQuery = "DELETE FROM cart WHERE cart_id = @CartID";
+                    string deleteQuery = "DELETE FROM [cart] WHERE cart_id = @CartID";
                     SqlCommand deleteCmd = new SqlCommand(deleteQuery, conn);
                     deleteCmd.Parameters.AddWithValue("@CartID", cartId);
 
@@ -119,7 +123,7 @@ namespace BTL_PTUD
                 }
                 else
                 {
-                    string query = "UPDATE cart SET quantity = @Quantity WHERE cart_id = @CartID";
+                    string query = "UPDATE [cart] SET quantity = @Quantity WHERE cart_id = @CartID";
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@Quantity", quantity);
                     cmd.Parameters.AddWithValue("@CartID", cartId);
@@ -143,11 +147,6 @@ namespace BTL_PTUD
             Response.Redirect("TrangChu.aspx");
         }
 
-        private int GetCustomerId()
-        {
-            // Thay thế phương thức này bằng cách lấy ID của khách hàng đã đăng nhập hoặc theo định danh phù hợp
-            return 1; // Giả định trả về ID của khách hàng
-        }
 
         private int GetQuantity(int cartId)
         {
@@ -155,7 +154,7 @@ namespace BTL_PTUD
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string query = "SELECT quantity FROM cart WHERE cart_id = @CartID";
+                string query = "SELECT quantity FROM [cart] WHERE cart_id = @CartID";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@CartID", cartId);
 

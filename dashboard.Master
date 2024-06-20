@@ -1,0 +1,65 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="dashboard.master.cs" Inherits="BTL_PTUD.dashboard" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <title>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #side-bar{
+            background-color: #1e293b;
+            color: #f8fafc;
+            width: 15%;
+            height: 100vh;
+            padding-top: 8px;
+        }
+        #side-bar .sb-item{
+            padding: 8px 10px;
+            transition: 0.2s ease;
+            cursor: pointer;
+        }
+        #side-bar .sb-item:hover{
+            background-color: #8f8f8f
+        }
+        .data-item h2{
+            font-size: 40px;
+            font-weight: bold;
+        }
+        th{
+            background-color: #ccc;
+            width: 200px;
+        }
+        th, td{
+            text-align: center;
+        }
+        td, input{
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="navbar flex justify-between px-5 h-[65px] items-center shadow-xl">
+            <a href="#"><img src="images/image1.png" alt="Alternate Text" class="h-[50px] w-[50px] object-cover"/></a>
+            <div class="name">Admin</div>
+        </div>
+        <div id="container" class="flex h-full">
+            <div id="side-bar">
+                <div class="sb-item"><a href="thongKe.aspx">Thống kê</a></div>
+                <div class="sb-item"><a href="QL_Product.aspx">QL Product</a></div>
+                <div class="sb-item"><a href="QL_Cart.aspx">QL Cart</a></div>
+                <div class="sb-item"><a href="QL_Order.aspx">QL Order</a></div>
+                <div class="sb-item"><a href="QL_User.aspx">QL User</a></div>
+            </div>
+            <div id="content" class="w-[85%] ">
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+            </asp:ContentPlaceHolder>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
@@ -20,17 +21,17 @@ namespace BTL_PTUD
             string email, mk;
             email = Request.Form["txtemail"];
             mk = Request.Form["txtmk"];
-            int customerId = GetCustomerId(email, mk);
+            int userID = GetUserId(email, mk);
             if (IsValidUser(email, mk))
             {
                 // Đăng nhập thành công
-                Session["CustomerId"] = customerId;
+                Session["user_id"] = userID;
                 Response.Redirect("TrangChu.aspx");
             }
             else
             {
                 // Đăng nhập thất bại
-                Response.Write("<script>alert('Email hoặc mật khẩu không đúng');</script>");
+                //Response.Write("<script>alert('Email hoặc mật khẩu không đúng');</script>");
             }
         }
         private bool IsValidUser(string email, string password)
@@ -40,7 +41,7 @@ namespace BTL_PTUD
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "SELECT COUNT(1) FROM customer WHERE Email = @Email AND Password = @Password";
+                string query = "SELECT COUNT(1) FROM [user] WHERE email = @Email AND password = @Password";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Email", email);
@@ -62,33 +63,25 @@ namespace BTL_PTUD
                 }
             }
         }
-        private int GetCustomerId(string email, string password)
+        private int GetUserId(string email, string password)
         {
             // Lấy chuỗi kết nối từ Web.config
-            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
+            string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string query = "SELECT customer_id FROM customer WHERE Email = @Email AND Password = @Password";
+                string query = "SELECT user_id FROM [user] WHERE email = @Email AND password = @Password";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Email", email);
                 cmd.Parameters.AddWithValue("@Password", password);
 
-                try
-                {
                     conn.Open();
                     var result = cmd.ExecuteScalar();
                     if (result != null)
                     {
                         return Convert.ToInt32(result);
                     }
-                }
-                catch (Exception ex)
-                {
-                    // Xử lý lỗi nếu có
-                    Response.Write("<script>alert('Có lỗi xảy ra: " + ex.Message + "');</script>");
-                }
             }
             return -1; // Trả về -1 nếu thông tin đăng nhập không hợp lệ
         }

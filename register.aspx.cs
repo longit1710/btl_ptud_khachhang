@@ -68,7 +68,7 @@ namespace BTL_PTUD
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "INSERT INTO customer (first_name, last_name,email,password,address,phone_number) VALUES (@FirstName, @LastName, @Email, @Password, @Address, @PhoneNumber)";
+                string query = "INSERT INTO [user] (first_name, last_name,email,password,address,phone_number) VALUES (@FirstName, @LastName, @Email, @Password, @Address, @PhoneNumber)";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@FirstName", firstName);
@@ -111,7 +111,7 @@ namespace BTL_PTUD
             string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = "SELECT COUNT(*) FROM customer WHERE email = @Email";
+                string query = "SELECT COUNT(*) FROM [user] WHERE email = @Email";
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Email", email);
                 conn.Open();

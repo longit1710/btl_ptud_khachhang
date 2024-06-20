@@ -173,11 +173,12 @@ namespace BTL_PTUD
             else if (e.CommandName == "AddToCart")
             {
                 int productId = Convert.ToInt32(e.CommandArgument);
-                int customerId = Helper.GetCustomerId();
+                int customerId = Helper.GetUserId();
                 if (customerId == -1)
                 {
                     string alt = "alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');";
                     ScriptManager.RegisterStartupScript(this, GetType(), "ServerControlScript", alt, true);
+                    Response.Redirect("login.aspx");
                     return;
                 }
 
@@ -187,7 +188,7 @@ namespace BTL_PTUD
                 {
                     conn.Open();
                     // Check if the product already exists in the customer's cart with status 'Pending'
-                    string queryCheck = "SELECT COUNT(*) FROM cart WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                    string queryCheck = "SELECT COUNT(*) FROM [cart] WHERE user_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                     SqlCommand cmdCheck = new SqlCommand(queryCheck, conn);
                     cmdCheck.Parameters.AddWithValue("@CustomerID", customerId);
                     cmdCheck.Parameters.AddWithValue("@ProductID", productId);
@@ -195,14 +196,14 @@ namespace BTL_PTUD
 
                     if (count > 0)
                     {
-                        // Update quantity and price
-                        string queryUpdate = "UPDATE cart SET quantity = quantity + 1, price = price + @Price WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                        // Update quantity
+                        string queryUpdate = "UPDATE [cart] SET quantity = quantity + 1 WHERE user_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                         SqlCommand cmdUpdate = new SqlCommand(queryUpdate, conn);
                         cmdUpdate.Parameters.AddWithValue("@CustomerID", customerId);
                         cmdUpdate.Parameters.AddWithValue("@ProductID", productId);
 
                         // Get product price
-                        string queryPrice = "SELECT price FROM product WHERE product_id = @ProductID";
+                        string queryPrice = "SELECT price FROM [product] WHERE product_id = @ProductID";
                         SqlCommand cmdPrice = new SqlCommand(queryPrice, conn);
                         cmdPrice.Parameters.AddWithValue("@ProductID", productId);
                         decimal price = Convert.ToDecimal(cmdPrice.ExecuteScalar());
@@ -213,13 +214,13 @@ namespace BTL_PTUD
                     else
                     {
                         // Insert new item into cart
-                        string queryInsert = "INSERT INTO cart (customer_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
+                        string queryInsert = "INSERT INTO [cart] (user_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
                         SqlCommand cmdInsert = new SqlCommand(queryInsert, conn);
                         cmdInsert.Parameters.AddWithValue("@CustomerID", customerId);
                         cmdInsert.Parameters.AddWithValue("@ProductID", productId);
 
                         // Get product price
-                        string queryPrice = "SELECT price FROM product WHERE product_id = @ProductID";
+                        string queryPrice = "SELECT price FROM [product] WHERE product_id = @ProductID";
                         SqlCommand cmdPrice = new SqlCommand(queryPrice, conn);
                         cmdPrice.Parameters.AddWithValue("@ProductID", productId);
                         decimal price = Convert.ToDecimal(cmdPrice.ExecuteScalar());
@@ -258,11 +259,15 @@ namespace BTL_PTUD
             if (e.CommandName == "SelectCategory")
             {
                 int categoryId = Convert.ToInt32(e.CommandArgument);
-                string query = $"SELECT * FROM product WHERE category_id = {categoryId}";
+                string query = $"SELECT * FROM [product] WHERE category_id = {categoryId}";
 
                 LoadProducts(query);
             }
         }
 
+        protected void DataListProducts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

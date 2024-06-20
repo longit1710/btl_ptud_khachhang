@@ -132,7 +132,7 @@
                 </asp:Repeater>
             </div>
 
-            <asp:DataList ID="DataListProducts" runat="server" DataKeyField="product_id" RepeatColumns="4" OnItemCommand="DataListProducts_ItemCommand" Width="100%">
+            <asp:DataList ID="DataListProducts" runat="server" DataKeyField="product_id" RepeatColumns="4" OnItemCommand="DataListProducts_ItemCommand" Width="100%" OnSelectedIndexChanged="DataListProducts_SelectedIndexChanged">
                 <ItemTemplate>
                     <div class="product-item">
                         <asp:Image ID="Image1" runat="server" ImageUrl='<%# "images/" + Eval("image") %>' />

@@ -8,6 +8,7 @@ namespace BTL_PTUD
 {
     public partial class Payment : System.Web.UI.Page
     {
+        private decimal totalAmount = 0;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -18,18 +19,18 @@ namespace BTL_PTUD
 
         protected void LoadCart()
         {
-            int customerId = GetCustomerId();
+            int userID = Helper.GetUserId();
             string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
                 string query = @"
                     SELECT c.product_id, p.name, c.quantity, c.price
-                    FROM cart c
-                    JOIN product p ON c.product_id = p.product_id
-                    WHERE c.customer_id = @CustomerID AND c.status = 'Pending'";
+                    FROM [cart] c
+                    JOIN [product] p ON c.product_id = p.product_id
+                    WHERE c.user_id = @userID AND c.status = 'Pending'";
                 SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@CustomerID", customerId);
+                cmd.Parameters.AddWithValue("@userID", userID);
 
                 conn.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -39,10 +40,11 @@ namespace BTL_PTUD
 
                 query = @"
                     SELECT SUM(c.quantity * c.price) AS TotalAmount
-                    FROM cart c
-                    WHERE c.customer_id = @CustomerID AND c.status = 'Pending'";
+                    FROM [cart] c
+                    WHERE c.user_id = @userID AND c.status = 'Pending'
+                    GROUP BY user_id";
                 cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@CustomerID", customerId);
+                cmd.Parameters.AddWithValue("@userID", userID);
                 lblTotalAmount.Text = ((decimal?)cmd.ExecuteScalar() ?? 0).ToString("C");
 
                 conn.Close();
@@ -51,14 +53,14 @@ namespace BTL_PTUD
 
         protected void btnPay_Click(object sender, EventArgs e)
         {
-            int customerId = GetCustomerId();
+            int customerId = Helper.GetUserId();
             string paymentMethod = ddlPaymentMethod.SelectedValue;
 
             // Tạo đơn hàng từ giỏ hàng và lưu vào CSDL
             CreateOrder(customerId, paymentMethod);
 
             // Xóa các sản phẩm trong giỏ hàng sau khi đã tạo đơn hàng
-            ClearCart(customerId);
+            //ClearCart(customerId);
 
             // Chuyển hướng người dùng đến trang xác nhận thanh toán
             Response.Redirect("PaymentConfirmation.aspx");
@@ -72,7 +74,7 @@ namespace BTL_PTUD
             {
                 // Tạo mới đơn hàng
                 string insertOrderQuery = @"
-                    INSERT INTO [order] (customer_id, order_date, payment_method)
+                    INSERT INTO [order] (user_id, order_date, payment_method)
                     VALUES (@CustomerID, GETDATE(), @PaymentMethod);
                     SELECT SCOPE_IDENTITY();";
                 SqlCommand cmd = new SqlCommand(insertOrderQuery, conn);
@@ -84,10 +86,10 @@ namespace BTL_PTUD
 
                 // Thêm từng sản phẩm trong giỏ hàng vào bảng order_item
                 string insertOrderItemQuery = @"
-                    INSERT INTO order_item (order_id, product_id, quantity, price)
+                    INSERT INTO [order_item] (order_id, product_id, quantity, price)
                     SELECT @OrderID, product_id, quantity, price
-                    FROM cart
-                    WHERE customer_id = @CustomerID AND status = 'Pending'";
+                    FROM [cart]
+                    WHERE user_id = @CustomerID AND status = 'Pending'";
                 SqlCommand cmdItems = new SqlCommand(insertOrderItemQuery, conn);
                 cmdItems.Parameters.AddWithValue("@OrderID", orderId);
                 cmdItems.Parameters.AddWithValue("@CustomerID", customerId);
@@ -97,44 +99,48 @@ namespace BTL_PTUD
             }
         }
 
-        protected void ClearCart(int customerId)
-        {
-            string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
+        //protected void ClearCart(int customerId)
+        //{
+        //    string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                string deleteCartItemsQuery = @"
-                    DELETE FROM cart
-                    WHERE customer_id = @CustomerID AND status = 'Pending'";
-                SqlCommand cmd = new SqlCommand(deleteCartItemsQuery, conn);
-                cmd.Parameters.AddWithValue("@CustomerID", customerId);
+        //    using (SqlConnection conn = new SqlConnection(connStr))
+        //    {
+        //        string deleteCartItemsQuery = @"
+        //            DELETE FROM [cart]
+        //            WHERE user_id = @CustomerID AND status = 'Pending'";
+        //        SqlCommand cmd = new SqlCommand(deleteCartItemsQuery, conn);
+        //        cmd.Parameters.AddWithValue("@CustomerID", customerId);
 
-                conn.Open();
-                cmd.ExecuteNonQuery();
-                conn.Close();
-            }
-        }
+        //        conn.Open();
+        //        cmd.ExecuteNonQuery();
+        //        conn.Close();
+        //    }
+        //}
 
-        private int GetCustomerId()
-        {
-            // Thay thế phương thức này bằng cách lấy ID của khách hàng đã đăng nhập hoặc theo định danh phù hợp
-            return 1; // Giả định trả về ID của khách hàng
-        }
         protected void rptCart_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
                 // Lấy dữ liệu từ DataItem
-                DataRowView drv = (DataRowView)e.Item.DataItem;
+                var dataItem = e.Item.DataItem as IDataRecord;
 
-                // Ví dụ: Gán dữ liệu cho một control trong ItemTemplate
-                Label lblProductName = (Label)e.Item.FindControl("lblProductName");
+                var lblProductName = (Label)e.Item.FindControl("lblProductName");
                 if (lblProductName != null)
                 {
-                    lblProductName.Text = drv["name"].ToString();
+                    lblProductName.Text = dataItem["name"].ToString();
                 }
-
-                // Các xử lý khác tương tự
+                var lblPrice = (Label)e.Item.FindControl("lblPrice");
+                if (lblPrice != null)
+                {
+                    lblPrice.Text = dataItem["price"].ToString();
+                }
+                decimal quantity = Convert.ToDecimal(dataItem["quantity"]);
+                decimal price = Convert.ToDecimal(dataItem["price"]);
+                totalAmount += quantity * price;
+            }
+            if (e.Item.ItemType == ListItemType.Footer)
+            {
+                lblTotalAmount.Text = totalAmount.ToString("#,##0.00") + " ₫";
             }
         }
 

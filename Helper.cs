@@ -7,11 +7,11 @@ namespace BTL_PTUD
 {
     public static class Helper
     {
-        public static int GetCustomerId()
+        public static int GetUserId()
         {
-            if (HttpContext.Current.Session["CustomerId"] != null)
+            if (HttpContext.Current.Session["user_id"] != null)
             {
-                return (int)HttpContext.Current.Session["CustomerId"];
+                return (int)HttpContext.Current.Session["user_id"];
             }
             return -1; // Hoặc một giá trị mặc định nào đó nếu không tìm thấy ID khách hàng
         }

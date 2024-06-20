@@ -14,11 +14,11 @@
     <form id="form1" runat="server">
         <div class="container">
             <h1>Đơn Hàng của Tôi</h1>
-            <asp:Repeater ID="rptOrders" runat="server">
+            <asp:Repeater ID="rptOrders" runat="server" OnItemCommand="rptOrders_ItemCommand1">
                 <ItemTemplate>
                     <div class="order-item">
                         <div class="order-details">
-                            <h3>Mã đơn hàng: <%# Eval("OrderID") %></h3>
+                            <h3>Mã đơn hàng: <%# Eval("OrderItemID") %></h3>
                             <div>
                                 Ngày đặt hàng: <%# Eval("OrderDate", "{0:dd/MM/yyyy}") %>
                             </div>

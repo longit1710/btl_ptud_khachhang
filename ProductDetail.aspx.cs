@@ -61,7 +61,7 @@ namespace BTL_PTUD
         protected void btnAdd_Click(object sender, EventArgs e)
         {
             int productId = Convert.ToInt32(Request.QueryString["productId"]);
-            int customerId = Helper.GetCustomerId();
+            int customerId = Helper.GetUserId();
 
             string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
@@ -69,7 +69,7 @@ namespace BTL_PTUD
             {
                 conn.Open();
                 // Check if the product already exists in the customer's cart with status 'Pending'
-                string queryCheck = "SELECT COUNT(*) FROM cart WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                string queryCheck = "SELECT COUNT(*) FROM cart WHERE user_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                 SqlCommand cmdCheck = new SqlCommand(queryCheck, conn);
                 cmdCheck.Parameters.AddWithValue("@CustomerID", customerId);
                 cmdCheck.Parameters.AddWithValue("@ProductID", productId);
@@ -78,7 +78,7 @@ namespace BTL_PTUD
                 if (count > 0)
                 {
                     // Update quantity and price
-                    string queryUpdate = "UPDATE cart SET quantity = quantity + 1, price = price + @Price WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                    string queryUpdate = "UPDATE cart SET quantity = quantity + 1 WHERE user_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                     SqlCommand cmdUpdate = new SqlCommand(queryUpdate, conn);
                     cmdUpdate.Parameters.AddWithValue("@CustomerID", customerId);
                     cmdUpdate.Parameters.AddWithValue("@ProductID", productId);
@@ -95,13 +95,13 @@ namespace BTL_PTUD
                 else
                 {
                     // Insert new item into cart
-                    string queryInsert = "INSERT INTO cart (customer_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
+                    string queryInsert = "INSERT INTO [cart] (user_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
                     SqlCommand cmdInsert = new SqlCommand(queryInsert, conn);
                     cmdInsert.Parameters.AddWithValue("@CustomerID", customerId);
                     cmdInsert.Parameters.AddWithValue("@ProductID", productId);
 
                     // Get product price
-                    string queryPrice = "SELECT price FROM product WHERE product_id = @ProductID";
+                    string queryPrice = "SELECT [price] FROM product WHERE product_id = @ProductID";
                     SqlCommand cmdPrice = new SqlCommand(queryPrice, conn);
                     cmdPrice.Parameters.AddWithValue("@ProductID", productId);
                     decimal price = Convert.ToDecimal(cmdPrice.ExecuteScalar());
@@ -131,7 +131,7 @@ namespace BTL_PTUD
             }
             else if (e.CommandName == "AddToCart")
             {
-                int customerId = Helper.GetCustomerId();
+                int customerId = Helper.GetUserId();
 
                 string connStr = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
 
@@ -139,7 +139,7 @@ namespace BTL_PTUD
                 {
                     conn.Open();
                     // Check if the product already exists in the customer's cart with status 'Pending'
-                    string queryCheck = "SELECT COUNT(*) FROM cart WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                    string queryCheck = "SELECT COUNT(*) FROM [cart] WHERE user_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                     SqlCommand cmdCheck = new SqlCommand(queryCheck, conn);
                     cmdCheck.Parameters.AddWithValue("@CustomerID", customerId);
                     cmdCheck.Parameters.AddWithValue("@ProductID", productId);
@@ -148,13 +148,13 @@ namespace BTL_PTUD
                     if (count > 0)
                     {
                         // Update quantity and price
-                        string queryUpdate = "UPDATE cart SET quantity = quantity + 1, price = price + @Price WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
+                        string queryUpdate = "UPDATE [cart] SET quantity = quantity + 1 WHERE customer_id = @CustomerID AND product_id = @ProductID AND status = 'Pending'";
                         SqlCommand cmdUpdate = new SqlCommand(queryUpdate, conn);
                         cmdUpdate.Parameters.AddWithValue("@CustomerID", customerId);
                         cmdUpdate.Parameters.AddWithValue("@ProductID", productId);
 
                         // Get product price
-                        string queryPrice = "SELECT price FROM product WHERE product_id = @ProductID";
+                        string queryPrice = "SELECT price FROM [product] WHERE product_id = @ProductID";
                         SqlCommand cmdPrice = new SqlCommand(queryPrice, conn);
                         cmdPrice.Parameters.AddWithValue("@ProductID", productId);
                         decimal price = Convert.ToDecimal(cmdPrice.ExecuteScalar());
@@ -165,13 +165,13 @@ namespace BTL_PTUD
                     else
                     {
                         // Insert new item into cart
-                        string queryInsert = "INSERT INTO cart (customer_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
+                        string queryInsert = "INSERT INTO [cart] (user_id, product_id, quantity, price, created_date, status) VALUES (@CustomerID, @ProductID, 1, @Price, GETDATE(), 'Pending')";
                         SqlCommand cmdInsert = new SqlCommand(queryInsert, conn);
                         cmdInsert.Parameters.AddWithValue("@CustomerID", customerId);
                         cmdInsert.Parameters.AddWithValue("@ProductID", productId);
 
                         // Get product price
-                        string queryPrice = "SELECT price FROM product WHERE product_id = @ProductID";
+                        string queryPrice = "SELECT [price] FROM product WHERE product_id = @ProductID";
                         SqlCommand cmdPrice = new SqlCommand(queryPrice, conn);
                         cmdPrice.Parameters.AddWithValue("@ProductID", productId);
                         decimal price = Convert.ToDecimal(cmdPrice.ExecuteScalar());
